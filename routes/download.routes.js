@@ -15,8 +15,8 @@ router.get('/:id', async (req, res) => {
         if (err) throw err
         fs.close(fd, () => console.log('write file'))
       })
-      const newFile = fs.createReadStream(file)
-      newFile.on('end', function() {
+      const stream = fs.createReadStream(file)
+      stream.on('end', function() {
         fs.unlink(file, function(err) {
           if (err) {
             console.error(err.toString())
@@ -25,7 +25,7 @@ router.get('/:id', async (req, res) => {
           }
         })
       })
-      newFile.pipe(res)
+      stream.pipe(res)
     })
   } catch (e) {
     console.log(e)
