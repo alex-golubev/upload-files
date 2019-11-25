@@ -17,7 +17,7 @@
     <transition-group name="list" tag="ul">
       <li v-for="file in files" :key="file.id" class="item list-item">
         <p>{{ file.title }}</p>
-        <a :href="'downloads/' + file.id" title="download" :download="file.title" @click="onDownloadFile(file.id)">
+        <a :href="'downloads/' + file.id" title="download" :download="file.title">
           <i class="fas fa-cloud-download-alt"></i>
         </a>
         <a href="#" title="remove" @click.prevent="onRemoveFile(file.id)">
