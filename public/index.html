@@ -17,7 +17,7 @@
     <transition-group name="list" tag="ul">
       <li v-for="file in files" :key="file.id" class="item list-item">
         <p>{{ file.title }}</p>
-        <a href="#" title="download" @click.prevent="onDownloadFile(file.id)">
+        <a :href="'downloads/' + file.id" title="download" :download="file.title" @click="onDownloadFile(file.id)">
           <i class="fas fa-cloud-download-alt"></i>
         </a>
         <a href="#" title="remove" @click.prevent="onRemoveFile(file.id)">
@@ -82,24 +82,6 @@
           this.showSubmit = false
           this.fileTitle = 'Choose a file'
         }
-      },
-      getFileUrl(url) {
-        const linkUrl = document.createElement('a')
-        linkUrl.download = url.substring((url.lastIndexOf('/') + 1), url.length)
-        linkUrl.href = url
-        document.body.appendChild(linkUrl)
-        linkUrl.click()
-        document.body.removeChild(linkUrl)
-      },
-      onDownloadFile(id) {
-        fetch(`/api/file/${id}`, {
-          method: 'get'
-        })
-          .then(res => res.json())
-          .then(file => {
-            this.getFileUrl(`tmp/${file}`);
-          })
-          .catch(e => console.log(e))
       },
       onRemoveFile(id) {
         fetch(`/api/file/${id}`, {

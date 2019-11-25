@@ -2,6 +2,7 @@ const express = require('express')
 const path = require('path')
 const fileUpload = require('express-fileupload')
 const fileRoutes = require('./routes/file.routes')
+const downloadRoutes = require('./routes/download.routes')
 const sequelize = require('./utils/database')
 const app = express()
 const port = process.env.PORT || '3000'
@@ -11,9 +12,10 @@ app.use(express.json())
 app.use(fileUpload({ debug: true }))
 
 app.use('/api/file', fileRoutes)
+app.use('/downloads', downloadRoutes)
 
 // noinspection JSUnusedLocalSymbols
-app.use((req, res, next) => {
+app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'))
 })
 
