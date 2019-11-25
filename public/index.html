@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <script src="https://kit.fontawesome.com/41ccaa7b69.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="css/app.css">
+  <script src="js/vue.js"></script>
+  <title>Document</title>
+</head>
+<body>
+<div id="app">
+  <h1>{{ title }}</h1>
+  <h2>File Upload</h2>
+  <div class="file-list">
+    <transition-group name="list" tag="ul">
+      <li v-for="file in files" :key="file.id" class="item list-item">
+        <p>{{ file.title }}</p>
+        <a href="#" title="download" @click.prevent="onDownloadFile(file.id)">
+          <i class="fas fa-cloud-download-alt"></i>
+        </a>
+        <a href="#" title="remove" @click.prevent="onRemoveFile(file.id)">
+          <i class="fas fa-trash-alt"></i>
+        </a>
+      </li>
+    </transition-group>
+  </div>
+  <div class="button-wrap">
+    <div class="input-wrap">
+      <input type="file" name="file" id="file" class="inputfile" @change="sync">
+      <label for="file">
+        <i class="fas fa-file-alt"></i>
+        {{ fileTitle }}
+      </label>
+    </div>
+    <transition name="fade">
+      <button v-if="showSubmit" class="submit-button" type="submit" @click="onSubmitFile">
+        <i class="fas fa-cloud-upload-alt"></i>
+        Submit
+      </button>
+    </transition>
+  </div>
+</div>
+
+<script>
+  new Vue({
+    el: '#app',
+    data: {
+      title: 'MS SQL',
+      file: '',
+      files: [],
+      fileTitle: 'Choose a file',
+      showSubmit: false
+    },
+    created() {
+      fetch('/api/file', {
+        method: 'get'
+      })
+        .then(res => res.json())
+        .then(files => this.files = files)
+        .catch(e => console.log(e))
+    },
+    methods: {
+      sync(e) {
+        e.preventDefault()
+        this.file = e.target.files[0]
+        this.showSubmit = true
+        this.fileTitle = e.target.value.replace(/\\/g, '/').split('/').pop()
+      },
+      onSubmitFile() {
+        if (this.file) {
+          formData = new FormData()
+          formData.append('data', this.file)
+          fetch('/api/file', {
+            method: 'post',
+            body: formData
+          })
+            .then(res => res.json())
+            .then(file => this.files.push(file))
+            .catch(e => console.log(e))
+          this.showSubmit = false
+          this.fileTitle = 'Choose a file'
+        }
+      },
+      getFileUrl(url) {
+        const linkUrl = document.createElement('a')
+        linkUrl.download = url.substring((url.lastIndexOf('/') + 1), url.length)
+        linkUrl.href = url
+        document.body.appendChild(linkUrl)
+        linkUrl.click()
+        document.body.removeChild(linkUrl)
+      },
+      onDownloadFile(id) {
+        fetch(`/api/file/${id}`, {
+          method: 'get'
+        })
+          .then(res => res.json())
+          .then(file => {
+            this.getFileUrl(`tmp/${file}`);
+          })
+          .catch(e => console.log(e))
+      },
+      onRemoveFile(id) {
+        fetch(`/api/file/${id}`, {
+          method: 'delete'
+        })
+          .then(() => {
+            this.files = this.files.filter(file => file.id !== id)
+          })
+          .catch()
+      }
+    }
+  })
+</script>
+</body>
+</html>
